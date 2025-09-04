@@ -19,9 +19,9 @@ function generateMonth(date) {
   return weeks
 }
 
-function Month({ index, style, onSelect, events }) {
+function Month({ index, style, onSelect, events, middle }) {
   const base = dayjs().startOf('month')
-  const month = base.add(index, 'month')
+  const month = base.add(index - middle, 'month')
   const weeks = generateMonth(month)
   const monthKey = month.format('YYYY-MM')
 
@@ -56,11 +56,11 @@ function Month({ index, style, onSelect, events }) {
 
 export default function Calendar({ onSelect, events, loadMonth }) {
   const total = 2400
-  const itemSize = 260
+  const rowHeight = 260
   const middle = Math.floor(total / 2)
 
-  const handleItemsRendered = ({ visibleStartIndex, visibleStopIndex }) => {
-    for (let i = visibleStartIndex; i <= visibleStopIndex; i++) {
+  const handleRowsRendered = ({ startIndex, stopIndex }) => {
+    for (let i = startIndex; i <= stopIndex; i++) {
       const month = dayjs().startOf('month').add(i - middle, 'month')
       loadMonth(month)
     }
@@ -69,21 +69,13 @@ export default function Calendar({ onSelect, events, loadMonth }) {
   return (
     <List
       className="calendar-list"
-      height={600}
-      width={'100%'}
-      itemCount={total}
-      itemSize={itemSize}
-      initialScrollOffset={middle * itemSize}
-      onItemsRendered={handleItemsRendered}
-    >
-      {({ index, style }) => (
-        <Month
-          index={index - middle}
-          style={style}
-          onSelect={onSelect}
-          events={events}
-        />
-      )}
-    </List>
+      style={{ height: 600, width: '100%' }}
+      rowCount={total}
+      rowHeight={rowHeight}
+      initialScrollOffset={middle * rowHeight}
+      onRowsRendered={handleRowsRendered}
+      rowComponent={Month}
+      rowProps={{ onSelect, events, middle }}
+    />
   )
 }
